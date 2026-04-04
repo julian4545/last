@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Ti</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: #080604;
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  font-family: 'Cormorant Garamond', serif;
+  cursor: default;
+}
+
+#canvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+}
+
+/* ===================== INTRO ===================== */
+#intro {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: #080604;
+  transition: opacity 2s ease;
+  overflow: hidden;
+}
+#intro.gone { opacity: 0; pointer-events: none; }
+
+/* Intro background canvas */
+#intro-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* Intro decorative ring */
+.intro-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(200,176,120,.08);
+  animation: ringPulse 6s ease-in-out infinite;
+}
+.intro-ring:nth-child(1) { width: 300px; height: 300px; animation-delay: 0s; }
+.intro-ring:nth-child(2) { width: 480px; height: 480px; animation-delay: 1s; border-color: rgba(200,176,120,.05); }
+.intro-ring:nth-child(3) { width: 660px; height: 660px; animation-delay: 2s; border-color: rgba(200,176,120,.03); }
+@keyframes ringPulse {
+  0%,100% { transform: scale(1); opacity: .6; }
+  50%      { transform: scale(1.04); opacity: 1; }
+}
+
+.intro-content {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center;
+}
+
+/* Big butterfly SVG in intro */
+#intro-butterfly {
+  width: clamp(100px, 20vw, 160px);
+  margin-bottom: 36px;
+  opacity: 0;
+  animation: floatIn 2s ease .3s forwards;
+  filter: drop-shadow(0 0 30px rgba(200,160,100,.25));
+}
+@keyframes introWing {
+  0%,100% { transform: scaleX(1); }
+  50%      { transform: scaleX(.35); }
+}
+#intro-wing-l { animation: introWing 1.2s ease-in-out infinite; transform-origin: right center; }
+#intro-wing-r { animation: introWing 1.2s ease-in-out infinite; transform-origin: left center; }
+
+.intro-title {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: clamp(36px, 7vw, 64px);
+  color: #e8d8b8; letter-spacing: .04em;
+  text-align: center; line-height: 1.2;
+  opacity: 0; animation: floatIn 2s ease 1s forwards;
+}
+.intro-from {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: clamp(12px, 2vw, 15px);
+  color: #6a5a40; letter-spacing: .35em;
+  margin-top: 14px; text-align: center;
+  text-transform: uppercase;
+  opacity: 0; animation: floatIn 2s ease 1.8s forwards;
+}
+
+/* Decorative line */
+.intro-line {
+  width: 1px; height: 50px;
+  background: linear-gradient(to bottom, transparent, rgba(200,176,120,.3), transparent);
+  margin: 32px auto;
+  opacity: 0; animation: floatIn 1.5s ease 2.4s forwards;
+}
+
+.intro-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: clamp(13px, 2.2vw, 16px);
+  color: #7a6a4a; letter-spacing: .18em;
+  text-align: center; line-height: 1.8;
+  opacity: 0; animation: floatIn 2s ease 2.8s forwards;
+}
+
+#btn-enter {
+  margin-top: 44px;
+  padding: 15px 58px;
+  background: transparent;
+  border: 1px solid rgba(200,176,120,.2);
+  border-radius: 1px; cursor: pointer;
+  font-family: 'IM Fell English', serif;
+  font-style: italic; font-size: 15px;
+  letter-spacing: .22em; color: #b8a070;
+  transition: all .5s;
+  opacity: 0; animation: floatIn 2s ease 3.4s forwards;
+  position: relative; overflow: hidden;
+}
+#btn-enter::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(200,176,120,.08) 0%, transparent 70%);
+  opacity: 0; transition: opacity .5s;
+}
+#btn-enter:hover { border-color: rgba(200,176,120,.45); color: #d8c090; }
+#btn-enter:hover::before { opacity: 1; }
+
+/* YouTube note */
+.yt-note {
+  margin-top: 18px;
+  font-size: 11px; font-style: italic; letter-spacing: .12em;
+  color: rgba(140,120,80,.4); text-align: center;
+  opacity: 0; animation: floatIn 1.5s ease 3.8s forwards;
+}
+
+@keyframes floatIn {
+  from { opacity:0; transform: translateY(16px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ===================== HINT ===================== */
+#hint {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-family: 'IM Fell English', serif;
+  font-style: italic; font-size: 13px;
+  letter-spacing: .2em; color: rgba(180,160,120,.45);
+  text-align: center; pointer-events: none;
+  opacity: 0; transition: opacity 1.2s ease;
+  white-space: nowrap;
+}
+#hint.show { opacity: 1; }
+
+/* ===================== MESSAGE CARD ===================== */
+#card-overlay {
+  position: fixed; inset: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .7s ease;
+}
+#card-overlay.open { opacity: 1; pointer-events: auto; }
+#card-overlay::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(5,3,2,.8);
+  backdrop-filter: blur(6px);
+}
+
+#card {
+  position: relative; z-index: 1;
+  max-width: 520px; width: 100%;
+  background: rgba(18,12,8,.97);
+  border: 1px solid rgba(200,176,120,.15);
+  border-radius: 3px;
+  padding: clamp(28px, 5vw, 52px);
+  transform: scale(.93) translateY(16px);
+  transition: transform .65s cubic-bezier(.2,.85,.3,1);
+}
+#card-overlay.open #card { transform: scale(1) translateY(0); }
+
+#card-butterfly { text-align: center; margin-bottom: 20px; }
+#card-butterfly svg { width: 60px; }
+
+#card-label {
+  font-family: 'IM Fell English', serif;
+  font-style: italic; font-size: 11px;
+  letter-spacing: .35em; text-transform: uppercase;
+  color: rgba(200,176,120,.45); text-align: center;
+  margin-bottom: 26px;
+}
+
+#card-text {
+  font-size: clamp(16px, 2.8vw, 19px);
+  line-height: 2; font-weight: 300;
+  color: #d4c8b0; text-align: center;
+}
+#card-text em { font-style: italic; color: #e8d8a0; }
+
+#card-close {
+  display: block; margin: 32px auto 0;
+  padding: 10px 38px;
+  background: transparent;
+  border: 1px solid rgba(200,176,120,.18);
+  border-radius: 2px; cursor: pointer;
+  font-family: 'IM Fell English', serif;
+  font-style: italic; font-size: 13px;
+  letter-spacing: .18em; color: rgba(200,176,120,.55);
+  transition: all .35s;
+}
+#card-close:hover { border-color: rgba(200,176,120,.45); color: #c8b070; }
+
+/* ===================== REPLY BUTTON (fixed, subtle) ===================== */
+#reply-fab {
+  position: fixed; bottom: 28px; right: 28px;
+  z-index: 20;
+  padding: 10px 24px;
+  background: rgba(14,10,6,.85);
+  border: 1px solid rgba(200,176,120,.2);
+  border-radius: 2px; cursor: pointer;
+  font-family: 'IM Fell English', serif;
+  font-style: italic; font-size: 12px;
+  letter-spacing: .18em; color: rgba(200,176,120,.5);
+  transition: all .4s;
+  opacity: 0; pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+#reply-fab.show { opacity: 1; pointer-events: auto; }
+#reply-fab:hover { border-color: rgba(200,176,120,.4); color: rgba(200,176,120,.85); }
+
+/* ===================== REPLY MODAL ===================== */
+#reply-modal {
+  position: fixed; inset: 0; z-index: 45;
+  display: flex; align-items: flex-end; justify-content: flex-end;
+  padding: 24px 28px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .6s ease;
+}
+#reply-modal.open { opacity: 1; pointer-events: auto; }
+#reply-modal::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(5,3,2,.6);
+  backdrop-filter: blur(4px);
+}
+
+#reply-card {
+  position: relative; z-index: 1;
+  width: min(400px, 94vw);
+  background: rgba(16,11,7,.98);
+  border: 1px solid rgba(200,176,120,.15);
+  border-radius: 3px;
+  padding: 28px;
+  transform: translateY(20px);
+  transition: transform .6s cubic-bezier(.2,.85,.3,1);
+}
+#reply-modal.open #reply-card { transform: translateY(0); }
+
+#reply-title {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 18px; color: #d8c8a8;
+  margin-bottom: 6px;
+}
+#reply-subtitle {
+  font-size: 12px; font-style: italic; letter-spacing: .12em;
+  color: rgba(180,160,120,.4); margin-bottom: 20px;
+}
+#reply-area {
+  width: 100%; min-height: 100px;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(200,176,120,.12);
+  border-radius: 2px; padding: 14px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; line-height: 1.8;
+  color: #d4c8b0; resize: none; outline: none;
+  transition: border-color .3s;
+}
+#reply-area::placeholder { color: rgba(180,160,120,.3); font-style: italic; }
+#reply-area:focus { border-color: rgba(200,176,120,.28); }
+.reply-note {
+  margin-top: 10px; font-size: 10px; font-style: italic;
+  color: rgba(180,160,120,.28); line-height: 1.7;
+}
+.reply-note code { font-family: monospace; font-style: normal; }
+.reply-actions {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 18px;
+}
+#btn-reply-send {
+  padding: 9px 28px; background: transparent;
+  border: 1px solid rgba(200,176,120,.22); border-radius: 2px;
+  cursor: pointer; font-family: 'IM Fell English', serif;
+  font-style: italic; font-size: 13px; letter-spacing: .16em;
+  color: rgba(200,176,120,.65); transition: all .35s;
+}
+#btn-reply-send:hover { border-color: rgba(200,176,120,.45); color: #c8b070; }
+#btn-reply-close {
+  background: transparent; border: none; cursor: pointer;
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 12px; letter-spacing: .14em;
+  color: rgba(180,160,120,.28); transition: color .3s;
+}
+#btn-reply-close:hover { color: rgba(180,160,120,.55); }
+#reply-sent {
+  display: none; text-align: center; padding: 16px 0;
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 16px; line-height: 2.2; color: rgba(200,176,120,.6);
+}
+
+/* ===================== YOUTUBE PLAYER ===================== */
+/* Mini music player */
+#music-player {
+  position: fixed; bottom: 28px; left: 28px; z-index: 30;
+  display: none; align-items: center; gap: 10px;
+  background: rgba(12,8,5,.92);
+  border: 1px solid rgba(200,176,120,.18);
+  border-radius: 2px;
+  padding: 10px 16px;
+  backdrop-filter: blur(8px);
+  transition: opacity .6s ease;
+  opacity: 0;
+}
+#music-player.show { display: flex; }
+#music-player.visible { opacity: 1; }
+#music-icon {
+  width: 28px; height: 28px; flex-shrink: 0;
+  cursor: pointer;
+}
+#music-icon svg { width: 100%; height: 100%; }
+#music-label {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 11px; letter-spacing: .14em;
+  color: rgba(200,176,120,.5);
+  cursor: pointer; transition: color .3s;
+}
+#music-label:hover { color: rgba(200,176,120,.85); }
+@keyframes musicPulse {
+  0%,100% { opacity: .5; } 50% { opacity: 1; }
+}
+#music-icon.playing svg circle { animation: musicPulse 2s ease-in-out infinite; }
+#yt-player { position: fixed; top:-9999px; left:-9999px; opacity:0; pointer-events:none; }
+</style>
+</head>
+<body>
+
+<!-- YOUTUBE IFRAME API -->
+<div id="yt-player"></div>
+
+<!-- MINI MUSIC PLAYER -->
+<div id="music-player">
+  <div id="music-icon" onclick="toggleMusic()" title="pausar / reanudar">
+    <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="14" cy="14" r="12" fill="none" stroke="rgba(200,176,120,.35)" stroke-width="1"/>
+      <g id="music-btn-icon">
+        <!-- play icon (default) -->
+        <polygon id="icon-play" points="11,9 20,14 11,19" fill="rgba(200,176,120,.65)"/>
+        <!-- pause icon (hidden) -->
+        <g id="icon-pause" style="display:none">
+          <rect x="10" y="9" width="3" height="10" fill="rgba(200,176,120,.65)" rx="1"/>
+          <rect x="15" y="9" width="3" height="10" fill="rgba(200,176,120,.65)" rx="1"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <span id="music-label" onclick="toggleMusic()">música</span>
+</div>
+
+<!-- INTRO -->
+<div id="intro">
+  <canvas id="intro-canvas"></canvas>
+  <div class="intro-ring"></div>
+  <div class="intro-ring"></div>
+  <div class="intro-ring"></div>
+
+  <div class="intro-content">
+    <!-- Animated butterfly -->
+    <svg id="intro-butterfly" viewBox="-70 -70 140 90" xmlns="http://www.w3.org/2000/svg">
+      <g id="intro-wing-l">
+        <path d="M0,0 C-12,-36,-52,-44,-64,-22 C-58,-5,-32,6,0,0" fill="#c8a0b8" opacity=".85"/>
+        <path d="M0,0 C-12,-24,-40,-28,-48,-16 C-44,-6,-24,2,0,0" fill="#a07898" opacity=".5"/>
+        <path d="M0,0 C-10,16,-42,26,-46,12 C-44,2,-22,-4,0,0" fill="#b88aaa" opacity=".7"/>
+      </g>
+      <g id="intro-wing-r">
+        <path d="M0,0 C12,-36,52,-44,64,-22 C58,-5,32,6,0,0" fill="#c8a0b8" opacity=".85"/>
+        <path d="M0,0 C12,-24,40,-28,48,-16 C44,-6,24,2,0,0" fill="#a07898" opacity=".5"/>
+        <path d="M0,0 C10,16,42,26,46,12 C44,2,22,-4,0,0" fill="#b88aaa" opacity=".7"/>
+      </g>
+      <ellipse cx="0" cy="-5" rx="3" ry="16" fill="#604858"/>
+      <circle cx="0" cy="-20" r="4" fill="#604858"/>
+      <path d="M-2,-24 Q-16,-46,-22,-54" stroke="#604858" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <path d="M2,-24 Q16,-46,22,-54" stroke="#604858" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <circle cx="-22" cy="-54" r="3" fill="#c8a0b8"/>
+      <circle cx="22" cy="-54" r="3" fill="#c8a0b8"/>
+    </svg>
+
+    <p class="intro-title">Para ti</p>
+    <p class="intro-from">con amor y con paz</p>
+    <div class="intro-line"></div>
+    <p class="intro-sub">tres mariposas te esperan<br>cada una lleva algo guardado</p>
+    <button id="btn-enter" onclick="startExperience()">entrar</button>
+    <p class="yt-note">activa el sonido para la experiencia completa</p>
+  </div>
+</div>
+
+<!-- HINT -->
+<div id="hint">toca cada mariposa</div>
+
+<!-- CANVAS (main scene) -->
+<canvas id="canvas"></canvas>
+
+<!-- MESSAGE CARD -->
+<div id="card-overlay">
+  <div id="card">
+    <div id="card-butterfly"></div>
+    <p id="card-label"></p>
+    <p id="card-text"></p>
+    <button id="card-close">cerrar</button>
+  </div>
+</div>
+
+<!-- REPLY BUTTON (fixed, appears after reading all) -->
+<button id="reply-fab" onclick="openReply()">responderle</button>
+
+<!-- REPLY MODAL (bottom-right, non-invasive) -->
+<div id="reply-modal">
+  <div id="reply-card">
+    <p id="reply-title">Tu respuesta</p>
+    <p id="reply-subtitle">este espacio es solo tuyo</p>
+    <textarea id="reply-area" rows="5" placeholder="Escribe lo que sientas..."></textarea>
+    <p class="reply-note">
+      Para envío real al correo: ve a <code>emailjs.com</code>, crea una cuenta gratuita
+      y reemplaza <code>EMAILJS_CONFIG</code> en el código.
+    </p>
+    <div class="reply-actions">
+      <button id="btn-reply-send" onclick="sendReply()">enviar</button>
+      <button id="btn-reply-close" onclick="closeReply()">cerrar</button>
+    </div>
+    <div id="reply-sent"><p>Tu mensaje<br>salió volando.</p></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+
+/* ============================================================
+   EMAILJS CONFIG — reemplaza estos valores
+   ============================================================ */
+const EMAILJS_CONFIG = {
+  publicKey:  "TU_PUBLIC_KEY",
+  serviceId:  "TU_SERVICE_ID",
+  templateId: "TU_TEMPLATE_ID",
+  toEmail:    "tu@correo.com"
+};
+try { emailjs.init(EMAILJS_CONFIG.publicKey); } catch(e){}
+
+/* ============================================================
+   YOUTUBE CONFIG
+   Pega aquí el ID de la canción de YouTube (los 11 caracteres después de ?v=)
+   Ejemplo: https://www.youtube.com/watch?v=XXXXXXXXXXX  → "XXXXXXXXXXX"
+   ============================================================ */
+const YT_VIDEO_ID = "-vwMNko3o7o";
+
+/* ============================================================
+   MESSAGES
+   ============================================================ */
+const MESSAGES = [
+  {
+    label: "i. el perdón",
+    color: { r:220, g:150, b:170 },
+    text: `Hay cosas que no supe decirte a tiempo.<br><br>Hoy quiero pedirte perdón — por los momentos donde fallé, por los silencios que pesaron más de lo que debían, por lo que pudo haber sido y no fue.<br><br>Lo reconozco, y lo cargo con honestidad.`,
+    wing1: "#e8b0c8", wing2: "#c07898", body: "#7a3858"
+  },
+  {
+    label: "ii. lo que me llevo",
+    color: { r:210, g:180, b:110 },
+    text: `<em>Me quedo con lo bonito.</em><br><br>Con todo lo que fuiste en los buenos momentos, con lo que aprendí al estar cerca de ti, con los instantes donde las dos versiones de nosotros fueron la mejor versión posible.<br><br>Eso no se borra. Y no quiero que se borre.<br><br>A partir de ahora mantendré distancia — no por rencor, sino porque esa es mi forma de cuidarme y de sanar.`,
+    wing1: "#f0d080", wing2: "#c09030", body: "#785020"
+  },
+  {
+    label: "iii. lo que te deseo",
+    color: { r:130, g:195, b:205 },
+    text: `Te deseo lo mejor.<br><br>De verdad, sin reservas, sin amargura. Que las cosas difíciles se vuelvan más livianas. Que encuentres calma. <em>Que alguien te cuide como mereces.</em><br><br>Este mensaje es mi último acto de amor — soltarte, con paz.`,
+    wing1: "#90c8e0", wing2: "#4898b8", body: "#185878"
+  }
+];
+
+/* ============================================================
+   YOUTUBE PLAYER — YT IFrame API con mini player visible
+   ============================================================ */
+let ytPlayer = null;
+let ytReady = false;
+let ytPlaying = false;
+let ytWantPlay = false;
+
+window.onYouTubeIframeAPIReady = function() {
+  ytPlayer = new YT.Player('yt-player', {
+    width: '1', height: '1',
+    videoId: YT_VIDEO_ID,
+    playerVars: {
+      autoplay: 1,
+      loop: 1,
+      playlist: YT_VIDEO_ID,
+      controls: 0,
+      rel: 0,
+      modestbranding: 1,
+      playsinline: 1
+    },
+    events: {
+      onReady: function(e) {
+        ytReady = true;
+        e.target.setVolume(60);
+        if (ytWantPlay) {
+          e.target.playVideo();
+          setPlaying(true);
+        }
+      },
+      onStateChange: function(e) {
+        if (e.data === YT.PlayerState.PLAYING) setPlaying(true);
+        if (e.data === YT.PlayerState.PAUSED)  setPlaying(false);
+      }
+    }
+  });
+};
+
+// Load YT script
+(function(){
+  const s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(s);
+})();
+
+function playYT() {
+  ytWantPlay = true;
+  if (ytReady && ytPlayer) {
+    ytPlayer.playVideo();
+    setPlaying(true);
+  }
+  // Show mini player
+  const mp = document.getElementById('music-player');
+  mp.classList.add('show');
+  setTimeout(() => mp.classList.add('visible'), 50);
+}
+
+function toggleMusic() {
+  if (!ytReady || !ytPlayer) return;
+  if (ytPlaying) {
+    ytPlayer.pauseVideo();
+  } else {
+    ytPlayer.playVideo();
+  }
+}
+
+function setPlaying(state) {
+  ytPlaying = state;
+  document.getElementById('icon-play').style.display  = state ? 'none'  : 'block';
+  document.getElementById('icon-pause').style.display = state ? 'block' : 'none';
+  document.getElementById('music-label').textContent  = state ? 'sonando' : 'pausado';
+}
+
+/* ============================================================
+   INTRO CANVAS — stars + floating petals
+   ============================================================ */
+const iCvs = document.getElementById('intro-canvas');
+const iCtx = iCvs.getContext('2d');
+let iW, iH, iStars = [], iPetals = [];
+
+function resizeIntro() {
+  iW = iCvs.width  = iCvs.offsetWidth;
+  iH = iCvs.height = iCvs.offsetHeight;
+}
+
+function mkIStar() {
+  return {
+    x: Math.random() * iW, y: Math.random() * iH,
+    r: Math.random() * 1.2 + .15,
+    sp: Math.random() * .015 + .003,
+    ph: Math.random() * Math.PI * 2
+  };
+}
+function mkIPetal() {
+  const cols = ['#c8a0b8','#d4b890','#a0b8c8','#c8c0a0'];
+  return {
+    x: Math.random() * iW, y: Math.random() * iH + iH,
+    vx: (Math.random()-.5)*.4, vy: -(Math.random()*.6+.2),
+    rot: Math.random()*Math.PI*2, rotV: (Math.random()-.5)*.015,
+    w: Math.random()*7+4, h: Math.random()*11+6,
+    alpha: Math.random()*.25+.08,
+    col: cols[Math.floor(Math.random()*cols.length)]
+  };
+}
+
+function initIntroScene() {
+  resizeIntro();
+  iStars  = Array.from({length:160}, mkIStar);
+  iPetals = Array.from({length:30},  mkIPetal);
+}
+
+let introRunning = true;
+function introLoop(t) {
+  if (!introRunning) return;
+  iCtx.clearRect(0, 0, iW, iH);
+
+  // Stars
+  iStars.forEach(s => {
+    const a = .15 + .7 * Math.sin(t*.001*s.sp + s.ph);
+    iCtx.beginPath(); iCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    iCtx.fillStyle = `rgba(220,210,190,${a})`; iCtx.fill();
+  });
+
+  // Petals
+  iPetals.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
+    if (p.y < -20) { Object.assign(p, mkIPetal()); p.y = iH + 10; }
+    iCtx.save();
+    iCtx.translate(p.x, p.y); iCtx.rotate(p.rot);
+    iCtx.globalAlpha = p.alpha;
+    iCtx.beginPath(); iCtx.ellipse(0,0,p.w/2,p.h/2,0,0,Math.PI*2);
+    iCtx.fillStyle = p.col; iCtx.fill();
+    iCtx.restore();
+  });
+
+  requestAnimationFrame(introLoop);
+}
+
+window.addEventListener('resize', () => { resizeIntro(); initIntroScene(); });
+initIntroScene();
+requestAnimationFrame(introLoop);
+
+/* ============================================================
+   MAIN CANVAS
+   ============================================================ */
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+let W, H;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', () => { resize(); if(started) initButterflies(); });
+
+/* ============================================================
+   PARTICLES
+   ============================================================ */
+let particles = [];
+const PCOLS = [
+  {r:220,g:160,b:185},{r:210,g:185,b:130},{r:190,g:215,b:205},{r:210,g:195,b:230}
+];
+
+function mkParticle(randomY) {
+  const c = PCOLS[Math.floor(Math.random()*PCOLS.length)];
+  return {
+    x: Math.random()*W, y: randomY ? Math.random()*H : -20,
+    vx: (Math.random()-.5)*.4, vy: Math.random()*.45+.15,
+    rot: Math.random()*Math.PI*2, rotV: (Math.random()-.5)*.018,
+    w: Math.random()*8+4, h: Math.random()*12+6,
+    alpha: Math.random()*.3+.08, col:c
+  };
+}
+function initParticles() {
+  particles = Array.from({length:60}, () => mkParticle(true));
+}
+
+function drawParticle(p) {
+  ctx.save();
+  ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+  ctx.globalAlpha = p.alpha;
+  ctx.beginPath(); ctx.ellipse(0,0,p.w/2,p.h/2,0,0,Math.PI*2);
+  ctx.fillStyle = `rgb(${p.col.r},${p.col.g},${p.col.b})`; ctx.fill();
+  ctx.restore();
+}
+
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
+function drawBg() {
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,   '#080604');
+  g.addColorStop(.45, '#100c07');
+  g.addColorStop(.8,  '#160e06');
+  g.addColorStop(1,   '#080604');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+  // Subtle warm glow center-bottom
+  const g2 = ctx.createRadialGradient(W/2, H*.85, 0, W/2, H*.85, W*.55);
+  g2.addColorStop(0, 'rgba(90,60,20,.12)');
+  g2.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g2; ctx.fillRect(0,0,W,H);
+}
+
+/* ============================================================
+   BUTTERFLY CLASS
+   ============================================================ */
+class Butterfly {
+  constructor(index, msg) {
+    this.index = index;
+    this.msg   = msg;
+    this.read  = false;
+    this.opened = false;
+    this.hovered = false;
+
+    // Spread starting positions
+    const zones = [[.15,.38],[.42,.62],[.66,.88]];
+    const z = zones[index];
+    this.baseX = W * (z[0] + Math.random()*(z[1]-z[0]));
+    this.baseY = H * (.18 + Math.random()*.55);
+    this.x = this.baseX;
+    this.y = this.baseY;
+
+    // Unique flight parameters per butterfly
+    this.driftR  = 55 + Math.random()*75;
+    this.driftSpd = .00038 + Math.random()*.00028;
+    this.driftOff  = Math.random()*Math.PI*2;
+    this.driftOff2 = Math.random()*Math.PI*2;
+
+    // Wing flap
+    this.wingT   = Math.random()*Math.PI*2;
+    this.wingSpd = 2.0 + Math.random()*.9;
+
+    // Scale
+    this.scale = .85 + Math.random()*.35;
+    this.hitR  = 44;
+
+    this.glowAlpha = 0;
+    this.labelAlpha = 0;
+  }
+
+  update(dt, t) {
+    if (this.opened) return;
+
+    this.x = this.baseX + Math.cos(t*this.driftSpd + this.driftOff)  * this.driftR;
+    this.y = this.baseY + Math.sin(t*this.driftSpd*1.35 + this.driftOff2) * (this.driftR*.5);
+
+    // Slow wander
+    this.baseX += Math.sin(t*.00012 + this.index*1.8) * .1;
+    this.baseY += Math.cos(t*.00015 + this.index*2.3) * .08;
+    this.baseX = Math.max(80, Math.min(W-80, this.baseX));
+    this.baseY = Math.max(80, Math.min(H-90,  this.baseY));
+
+    this.wingT += dt * this.wingSpd;
+
+    // Glow & label ease
+    const tgt = this.hovered ? 1 : 0;
+    this.glowAlpha  += (tgt - this.glowAlpha)  * dt * 5;
+    this.labelAlpha += (tgt - this.labelAlpha)  * dt * 5;
+    this.glowAlpha  = Math.max(0, Math.min(1, this.glowAlpha));
+    this.labelAlpha = Math.max(0, Math.min(1, this.labelAlpha));
+  }
+
+  draw() {
+    if (this.opened) return;
+    const { x, y, scale, wingT, msg, read } = this;
+    const wingOpen = .12 + .88 * ((Math.sin(wingT)*.5+.5));
+    const alpha = read ? .45 : 1;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Glow halo
+    if (this.glowAlpha > .005) {
+      const c = msg.color;
+      const g = ctx.createRadialGradient(0,0,0,0,0,60*scale);
+      g.addColorStop(0, `rgba(${c.r},${c.g},${c.b},${.22*this.glowAlpha})`);
+      g.addColorStop(1, `rgba(${c.r},${c.g},${c.b},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(0,0,60*scale,0,Math.PI*2); ctx.fill();
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const drawWings = (flip) => {
+      const sx = flip ? -wingOpen * scale : wingOpen * scale;
+      ctx.save(); ctx.scale(sx, scale);
+
+      // Upper wing
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.bezierCurveTo(-8,-28,-38,-34,-50,-17);
+      ctx.bezierCurveTo(-46,-4,-26,5,0,0);
+      ctx.fillStyle = msg.wing1; ctx.fill();
+
+      // Upper wing inner pattern
+      ctx.beginPath();
+      ctx.moveTo(-6,-7);
+      ctx.bezierCurveTo(-18,-17,-34,-19,-38,-11);
+      ctx.bezierCurveTo(-34,-5,-18,-1,-6,-7);
+      ctx.fillStyle = msg.wing2; ctx.globalAlpha = alpha*.4; ctx.fill();
+      ctx.globalAlpha = alpha;
+
+      // Lower wing
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.bezierCurveTo(-7,12,-30,20,-35,10);
+      ctx.bezierCurveTo(-33,2,-16,-3,0,0);
+      ctx.fillStyle = msg.wing2; ctx.globalAlpha = alpha*.82; ctx.fill();
+      ctx.globalAlpha = alpha;
+
+      ctx.restore();
+    };
+
+    drawWings(true);   // left
+    drawWings(false);  // right
+
+    // Body
+    ctx.scale(scale, scale);
+    ctx.fillStyle = msg.body;
+    ctx.beginPath(); ctx.ellipse(0,-4,2.5,13,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0,-17,3.5,0,Math.PI*2); ctx.fill();
+
+    // Antennae
+    ctx.strokeStyle = msg.body; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(-2,-20); ctx.quadraticCurveTo(-12,-35,-17,-41); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( 2,-20); ctx.quadraticCurveTo( 12,-35, 17,-41); ctx.stroke();
+    const c = msg.color;
+    ctx.fillStyle = `rgb(${c.r},${c.g},${c.b})`;
+    ctx.beginPath(); ctx.arc(-17,-41,2.5,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc( 17,-41,2.5,0,Math.PI*2); ctx.fill();
+
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    // Hover label
+    if (this.labelAlpha > .005) {
+      ctx.save();
+      ctx.globalAlpha = this.labelAlpha * .65;
+      ctx.font = "italic 11px 'IM Fell English', serif";
+      ctx.fillStyle = `rgb(${msg.color.r},${msg.color.g},${msg.color.b})`;
+      ctx.textAlign = 'center';
+      ctx.fillText(msg.label, x, y + 52*scale);
+      ctx.restore();
+    }
+
+    // Read indicator (small dot)
+    if (read) {
+      ctx.save();
+      ctx.globalAlpha = .4;
+      ctx.fillStyle = `rgb(${msg.color.r},${msg.color.g},${msg.color.b})`;
+      ctx.beginPath(); ctx.arc(x + 24*scale, y - 28*scale, 3.5, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  isHit(mx, my) {
+    const dx = mx-this.x, dy = my-this.y;
+    return Math.sqrt(dx*dx+dy*dy) < this.hitR;
+  }
+}
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+let butterflies = [];
+let lastT = 0, readCount = 0, cardOpen = false, started = false;
+
+function initButterflies() {
+  butterflies = MESSAGES.map((m,i) => new Butterfly(i,m));
+}
+
+function loop(ts) {
+  const dt = Math.min((ts-lastT)/1000, .05);
+  lastT = ts;
+  drawBg();
+  particles.forEach(p => {
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV;
+    if(p.y > H+20) Object.assign(p, mkParticle(false));
+    drawParticle(p);
+  });
+  if(started) butterflies.forEach(b => { b.update(dt,ts); b.draw(); });
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ============================================================
+   INTERACTION
+   ============================================================ */
+canvas.addEventListener('mousemove', e => {
+  if(!started||cardOpen) return;
+  let hover = false;
+  butterflies.forEach(b => {
+    b.hovered = !b.opened && b.isHit(e.clientX, e.clientY);
+    if(b.hovered) hover = true;
+  });
+  canvas.style.cursor = hover ? 'pointer' : 'default';
+});
+
+canvas.addEventListener('click', e => {
+  if(!started||cardOpen) return;
+  butterflies.forEach(b => { if(!b.opened && b.isHit(e.clientX,e.clientY)) openCard(b); });
+});
+
+canvas.addEventListener('touchstart', e => {
+  if(!started||cardOpen) return;
+  const t = e.touches[0];
+  butterflies.forEach(b => {
+    if(!b.opened && b.isHit(t.clientX,t.clientY)) { e.preventDefault(); openCard(b); }
+  });
+}, {passive:false});
+
+/* ============================================================
+   CARD OPEN / CLOSE
+   ============================================================ */
+function openCard(b) {
+  cardOpen = true; b.opened = true;
+  document.getElementById('hint').classList.remove('show');
+
+  document.getElementById('card-butterfly').innerHTML = `
+    <svg viewBox="-62 -58 124 78" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C-8,-28,-38,-34,-50,-17 C-46,-4,-26,5,0,0" fill="${b.msg.wing1}"/>
+      <path d="M0,0 C8,-28,38,-34,50,-17 C46,-4,26,5,0,0"  fill="${b.msg.wing1}"/>
+      <path d="M0,0 C-7,12,-30,20,-35,10 C-33,2,-16,-3,0,0" fill="${b.msg.wing2}" opacity=".8"/>
+      <path d="M0,0 C7,12,30,20,35,10 C33,2,16,-3,0,0"     fill="${b.msg.wing2}" opacity=".8"/>
+      <ellipse cx="0" cy="-4" rx="2.5" ry="13" fill="${b.msg.body}"/>
+      <circle cx="0" cy="-17" r="3.5" fill="${b.msg.body}"/>
+    </svg>`;
+
+  document.getElementById('card-label').textContent = b.msg.label;
+  document.getElementById('card-text').innerHTML = b.msg.text;
+  document.getElementById('card-overlay').classList.add('open');
+
+  setTimeout(() => { b.read = true; b.opened = false; }, 500);
+}
+
+function closeCard() {
+  document.getElementById('card-overlay').classList.remove('open');
+  cardOpen = false;
+  readCount++;
+
+  if(readCount >= 3) {
+    // Show subtle reply FAB
+    document.getElementById('reply-fab').classList.add('show');
+    document.getElementById('hint').textContent = 'has leído las tres ✦';
+    document.getElementById('hint').classList.add('show');
+    setTimeout(() => document.getElementById('hint').classList.remove('show'), 3500);
+  } else {
+    const left = 3-readCount;
+    document.getElementById('hint').textContent = `${left} mariposa${left>1?'s':''} más te esperan`;
+    document.getElementById('hint').classList.add('show');
+    setTimeout(() => document.getElementById('hint').classList.remove('show'), 3000);
+  }
+}
+
+document.getElementById('card-close').addEventListener('click', closeCard);
+document.getElementById('card-overlay').addEventListener('click', e => {
+  if(e.target === document.getElementById('card-overlay')) closeCard();
+});
+
+/* ============================================================
+   REPLY MODAL
+   ============================================================ */
+function openReply() {
+  document.getElementById('reply-modal').classList.add('open');
+}
+function closeReply() {
+  document.getElementById('reply-modal').classList.remove('open');
+}
+document.getElementById('btn-reply-close').addEventListener('click', closeReply);
+document.getElementById('reply-modal').addEventListener('click', e => {
+  if(e.target === document.getElementById('reply-modal')) closeReply();
+});
+
+async function sendReply() {
+  const msg = document.getElementById('reply-area').value.trim();
+  if(!msg) {
+    document.getElementById('reply-area').style.borderColor = 'rgba(220,80,80,.35)';
+    setTimeout(() => document.getElementById('reply-area').style.borderColor='', 1500);
+    return;
+  }
+  const btn = document.getElementById('btn-reply-send');
+  btn.textContent='enviando...'; btn.disabled=true;
+  try {
+    await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+      message: msg, to_email: EMAILJS_CONFIG.toEmail, from_label:'Las Mariposas'
+    });
+  } catch(e){ console.log('EmailJS demo mode'); }
+  document.getElementById('reply-area').style.display='none';
+  document.getElementById('btn-reply-send').style.display='none';
+  document.getElementById('btn-reply-close').style.display='none';
+  document.querySelector('.reply-note').style.display='none';
+  document.getElementById('reply-sent').style.display='block';
+  document.getElementById('reply-fab').style.display='none';
+}
+
+/* ============================================================
+   START EXPERIENCE
+   ============================================================ */
+function startExperience() {
+  // Play YouTube audio
+  playYT();
+
+  // Init scene
+  initParticles();
+  initButterflies();
+  started = true;
+
+  // Fade out intro
+  const intro = document.getElementById('intro');
+  intro.classList.add('gone');
+  introRunning = false;
+  setTimeout(() => { intro.style.display='none'; }, 2100);
+
+  // Show hint after a moment
+  setTimeout(() => {
+    document.getElementById('hint').classList.add('show');
+    setTimeout(() => document.getElementById('hint').classList.remove('show'), 5000);
+  }, 2500);
+}
+</script>
+</body>
+</html>
