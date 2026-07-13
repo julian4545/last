@@ -1210,7 +1210,8 @@ function loadSong(index, autoplay) {
   }
   ytPlayer.loadVideoById(songs[index].youtubeId);
   if (autoplay) {
-    setTimeout(() => { try { ytPlayer.playVideo(); } catch (e) {} }, 200);
+    ytPlayer.playVideo();
+    try { ytPlayer.unMute(); ytPlayer.setVolume(100); } catch (e) {}
   } else {
     setTimeout(() => ytPlayer.pauseVideo(), 300);
   }
@@ -1230,6 +1231,7 @@ function loadSong(index, autoplay) {
 function play() {
   if (!ytReady) return;
   ytPlayer.playVideo();
+  try { ytPlayer.unMute(); ytPlayer.setVolume(100); } catch (e) {}
 }
 function pause() {
   if (!ytReady) return;
