@@ -1012,8 +1012,17 @@ var swiper = new Swiper(".swiper", {
   speed: 600,
   slidesPerView: "auto",
   coverflowEffect: { rotate: 10, stretch: 120, depth: 200, modifier: 1, slideShadows: false },
-  on: { click(event) { swiper.slideTo(this.clickedIndex); } },
   pagination: { el: ".swiper-pagination" },
+});
+
+/* Cuando el usuario navega el slider a mano (flechas, swipe, puntos),
+   sincronizamos la canción del reproductor con el slide activo. */
+swiper.on("slideChangeTransitionEnd", () => {
+  if (syncingFromPlayer) return; // este cambio de slide lo disparó el propio reproductor, ignorar
+  const idx = swiper.realIndex;
+  if (typeof idx === "number" && idx !== currentSongIndex && typeof loadSong === "function") {
+    loadSong(idx, true);
+  }
 });
 
 /* ================= REPRODUCTOR (YouTube IFrame API) ================= */
@@ -1143,6 +1152,7 @@ let ytPlayer = null;
 let ytReady = false;
 let pendingSongIndex = 0;
 let currentSongIndex = 0;
+let syncingFromPlayer = false; // evita que la sincronización player->slide dispare de nuevo slide->player
 
 /* Videos del canal oficial de NCS (No Copyright Sounds) — pensados para embeberse libremente */
 const songs = [
@@ -1209,7 +1219,13 @@ function loadSong(index, autoplay) {
   }
 
   /* Sincronizar el slider de arriba con la canción actual */
-  swiper.slideToLoop(index);
+  syncingFromPlayer = true;
+  try {
+    swiper.slideToLoop(index, 600, true);
+  } catch (err) {
+    console.error("Error moviendo el slider (slideToLoop):", err);
+  }
+  setTimeout(() => { syncingFromPlayer = false; }, 700);
 
   const waitDuration = setInterval(() => {
     const d = ytPlayer.getDuration();
@@ -1221,17 +1237,29 @@ function loadSong(index, autoplay) {
 }
 
 function play() {
-  if (!ytReady) return;
-  ytPlayer.playVideo();
-  try { ytPlayer.unMute(); ytPlayer.setVolume(100); } catch (e) {}
+  if (!ytReady) { console.warn("play(): el player todavía no está listo (ytReady=false)"); return; }
+  try {
+    ytPlayer.playVideo();
+    ytPlayer.unMute();
+    ytPlayer.setVolume(100);
+  } catch (err) {
+    console.error("Error en play():", err);
+  }
 }
 function pause() {
   if (!ytReady) return;
-  ytPlayer.pauseVideo();
+  try { ytPlayer.pauseVideo(); } catch (err) { console.error("Error en pause():", err); }
 }
 function playPause() {
-  if (!ytReady) return;
-  const state = ytPlayer.getPlayerState();
+  if (!ytReady) { console.warn("playPause(): el player todavía no está listo (ytReady=false)"); return; }
+  let state;
+  try {
+    state = ytPlayer.getPlayerState();
+  } catch (err) {
+    console.error("Error leyendo el estado del player:", err);
+    return;
+  }
+  console.log("playPause() — estado actual:", state, "(1=playing, 2=paused)");
   if (state === YT.PlayerState.PLAYING) {
     pause();
   } else {
